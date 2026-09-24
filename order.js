@@ -1,8 +1,44 @@
-const $=id=>document.getElementById(id);const fields=['plan','main','people','date','time','receive'];
-const names={'1':'PLAN 01 定番人気','2':'PLAN 02 お肉しっかり','3':'PLAN 03 彩りバランス','4':'PLAN 04 おつまみ充実','5':'PLAN 05 お祝い','6':'PLAN 06 プレミアム'};
-const planPhotos={'1':'images/plan1.png','2':'images/plan2.png','3':'images/plan3.png','4':'images/plan4.png','5':'images/plan5.png','6':'images/plan6.png'};
-const requested=new URLSearchParams(location.search).get('plan');if(Object.hasOwn(names,requested))$('plan').value=requested;
-const localToday=new Date();let y=localToday.getFullYear(),m=String(localToday.getMonth()+1).padStart(2,'0'),d=String(localToday.getDate()).padStart(2,'0');$('date').min=y+'-'+m+'-'+d;
-function update(){const n=Number($('people').value);$('sumPlan').textContent=names[$('plan').value]||'未選択';$('sumMain').textContent=$('main').value||'未選択';$('sumPeople').textContent=Number.isInteger(n)&&n>=4?n+'名':'4名以上を指定';$('sumDate').textContent=$('date').value||'未選択';$('sumReceive').textContent=$('receive').value||'未選択'; if($('plan').value && $('sumPhoto')) $('sumPhoto').src = planPhotos[$('plan').value]; const delivery=$('receive').value==='配送希望';$('addressWrap').hidden=!delivery;$('address').required=delivery;document.querySelectorAll('[data-people]').forEach(b=>b.classList.toggle('active',Number(b.dataset.people)===n));}
-fields.forEach(f=>$(f).addEventListener('change',update));$('people').addEventListener('input',update);document.querySelectorAll('[data-people]').forEach(b=>b.addEventListener('click',()=>{$('people').value=b.dataset.people;update();}));
-$('orderForm').addEventListener('submit',e=>{e.preventDefault();if(!$('orderForm').reportValidity())return;const n=Number($('people').value);if(!Number.isInteger(n)||n<4){$('people').setCustomValidity('4名以上の整数で指定してください。');$('people').reportValidity();return;} $('people').setCustomValidity('');$('confirm').classList.add('show');$('confirm').textContent=`入力内容を確認しました（デモ）。${names[$('plan').value]}・${$('main').value}・${n}名・${$('date').value}・${$('time').value}・${$('receive').value}。実際の注文は送信されていません。`; $('confirm').scrollIntoView({behavior:'smooth',block:'center'});});$('people').addEventListener('input',()=>$('people').setCustomValidity(''));update();
+const $ = id => document.getElementById(id);
+const yen = n => n.toLocaleString('ja-JP') + '円';
+const selectedPlan = () => DELI_CATALOG.plans.find(p => p.id === $('plan').value);
+const selectedMain = () => DELI_CATALOG.mains.find(m => m.name === $('main').value);
+const planLabel = p => p ? 'PLAN 0' + p.id + ' ' + p.name + '（' + p.boxes.join('＋') + '）' : '未選択';
+const requested = new URLSearchParams(location.search).get('plan');
+if (DELI_CATALOG.plans.some(p => p.id === requested)) $('plan').value = requested;
+const today = new Date();
+$('date').min = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+function update() {
+  const p = selectedPlan(), m = selectedMain(), n = Number($('people').value);
+  const valid = Number.isInteger(n) && n >= 4 && n <= 999;
+  $('people').setCustomValidity(valid ? '' : '4〜999名の整数で指定してください。');
+  $('sumPlan').textContent = planLabel(p);
+  $('sumMain').textContent = m ? m.name : '未選択';
+  $('sumPeople').textContent = valid ? n + '名' : '4〜999名を指定';
+  $('sumDate').textContent = $('date').value || '未選択';
+  $('sumReceive').textContent = $('receive').value || '未選択';
+  $('sumPhoto').hidden = !p;
+  if (p) { $('sumPhoto').src = p.photo; $('sumPhoto').alt = p.name + 'の参考イメージ'; }
+  $('sumBase').textContent = !p ? '未選択' : n === 4 ? yen(p.price) : '人数に応じて要確認';
+  $('sumExtra').textContent = !m || !valid ? '未選択' : n === 4 ? yen(m.extra * 4) : '要確認（参考単価 ' + yen(m.extra) + '／人）';
+  $('sumTotal').textContent = !valid ? '人数を確認してください' : !p || !m ? 'プランとメインを選択' : n === 4 ? yen(p.price + m.extra * 4) : '要確認';
+  $('priceNote').textContent = n === 4 ? '税込参考価格です。送料は未確定のため含みません。' : '4人前以外の価格・販売単位は未確定です。人数比例での合計計算は行っていません。';
+  const delivery = $('receive').value === '配送希望';
+  $('addressWrap').hidden = !delivery;
+  $('address').required = delivery;
+  document.querySelectorAll('[data-people]').forEach(b => b.classList.toggle('active', Number(b.dataset.people) === n));
+  document.querySelectorAll('[data-main]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.main === $('main').value)));
+  $('confirm').classList.remove('show');
+}
+$('orderForm').addEventListener('input', update);
+$('orderForm').addEventListener('change', update);
+document.querySelectorAll('[data-people]').forEach(b => b.addEventListener('click', () => { $('people').value = b.dataset.people; update(); }));
+document.querySelectorAll('[data-main]').forEach(b => b.addEventListener('click', () => { $('main').value = b.dataset.main; update(); }));
+$('orderForm').addEventListener('submit', e => {
+  e.preventDefault();
+  update();
+  if (!$('orderForm').reportValidity()) return;
+  $('confirm').textContent = '入力内容の確認（デモ）：' + planLabel(selectedPlan()) + '／' + $('main').value + '／' + $('people').value + '名／' + $('date').value + ' ' + $('time').value + '／' + $('receive').value + '。商品参考合計：' + $('sumTotal').textContent + '（送料別途未定）。実際の注文は送信・保存されていません。';
+  $('confirm').classList.add('show');
+  $('confirm').scrollIntoView({behavior:'smooth', block:'center'});
+});
+update();

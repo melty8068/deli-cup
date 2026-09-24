@@ -24,3 +24,35 @@
 /* Preserve the full square main menu photos on both pages. */
 .main-item .pic{aspect-ratio:1}
 .order-visual-grid img{height:auto;aspect-ratio:1}
+
+/* Plan comparison and benefit-led landing page. */
+html{scroll-padding-top:90px}
+.hero h1{font-size:clamp(32px,4.1vw,51px);line-height:1.35;letter-spacing:-.04em}
+.hero h1 em{font-style:normal;color:#b64d16}
+.hero-price strong{font-size:26px;color:var(--navy)}
+.hero-price small{display:block;font-size:12px}
+.plan-price{margin-bottom:0}
+.plan-price strong{font-size:30px;line-height:1.3;color:#b64d16;display:block;font-variant-numeric:tabular-nums}
+.plan-price span{font-size:12px}
+.plan .per-person{color:var(--navy);font-weight:700;margin-top:6px}
+.plan-details{margin:4px 0 22px;border-top:1px solid var(--line);padding-top:12px;font-size:13px}
+.plan-details summary{cursor:pointer;font-weight:700;padding:6px 0}
+.plan-details h4{margin:12px 0 4px}
+.plan-details ul{padding-left:20px;margin:0}
+.main-price{font-size:13px;color:#b64d16;font-weight:700}
+.main-choice{padding:0;text-align:left;cursor:pointer;color:inherit;font:inherit}
+.order-visual-grid .main-choice[aria-pressed="true"]{border:3px solid var(--green);background:#edf7f0}
+.order-visual-grid small{display:block;font-weight:400;font-size:11px}
+.total-line strong{font-size:23px;color:#b64d16}
+summary:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid #1c91ee;outline-offset:3px}
+@media(max-width:600px){
+  body:has(.sticky-mobile){padding-bottom:86px}
+  .sticky-mobile{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:20;align-items:center;justify-content:space-between;gap:8px;background:#fff;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px #18365112}
+  .sticky-mobile span{font-size:13px;font-weight:800}
+  .sticky-mobile small{display:block;font-size:10px;color:var(--muted)}
+  .sticky-mobile .button{font-size:13px;padding:8px 14px}
+  .hero h1{font-size:clamp(29px,7.8vw,40px)}
+  .header-inner{gap:8px}
+  .plan-photo{background-position:center!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
