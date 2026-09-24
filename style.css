@@ -20,3 +20,7 @@
 .order-visual-grid img{width:100%;height:94px;object-fit:cover;display:block}
 .order-visual-grid span{display:block;padding:7px 9px;font-size:12px;font-weight:800;color:var(--navy)}
 @media(max-width:600px){.hero-photo{height:280px}.order-visual-grid img{height:88px}}
+
+/* Preserve the full square main menu photos on both pages. */
+.main-item .pic{aspect-ratio:1}
+.order-visual-grid img{height:auto;aspect-ratio:1}
